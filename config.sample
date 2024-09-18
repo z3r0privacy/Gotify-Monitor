@@ -4,6 +4,7 @@
     "channels": [
         {
             "name": "Kometa",
+            "enabled": true,
             "query_hours": 48,
             "max_runtime_minutes": 60,
             "expected_start": "Run Started",

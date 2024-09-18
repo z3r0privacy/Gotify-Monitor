@@ -133,7 +133,9 @@ if __name__ == "__main__":
 
     results = []
     for channel in config['channels']:
-        res = query_channel(config['gotify_url'], config["gotify_client_key"], channel)
-        if res is not None:
-            results.append((channel['name'], channel['max_runtime_minutes'], *res))
+        if channel['enabled']:
+            res = query_channel(config['gotify_url'], config["gotify_client_key"], channel)
+            if res is not None:
+                results.append((channel['name'], channel['max_runtime_minutes'], *res))
+
     print(create_prtg_xml(results))
