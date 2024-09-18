@@ -1,0 +1,14 @@
+{
+    "gotify_url": "https://gotify.domain.local",
+    "gotify_client_key": "abcdef123456",
+    "channels": [
+        {
+            "name": "Kometa",
+            "query_hours": 48,
+            "max_runtime_minutes": 60,
+            "expected_start": "Run Started",
+            "expected_stop": "Run Completed",
+            "ignored_titles": ["Playlist Modified"]
+        }
+    ]
+}
