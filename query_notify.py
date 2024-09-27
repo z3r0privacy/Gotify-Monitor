@@ -27,7 +27,7 @@ def query_channel(gotify_url, gotify_apikey, channel):
         return
     
     try:
-        look_back = datetime.now(timezone.utc) - timedelta(hours=channel['query_hours']+1)
+        look_back = datetime.now(timezone.utc) - timedelta(hours=channel['query_hours']+channel['max_runtime_minutes']/60)
         resp_messages = r.get(f"{gotify_url}/application/{cid}/message", headers={"X-Gotify-Key": gotify_apikey})
         if not resp_messages.ok:
             errs.append(f"{channel['name']}: api call returned {resp_messages.status_code}")
@@ -118,12 +118,38 @@ def create_prtg_xml(results):
     xml += "</prtg>"
     return xml
 
+def create_plain_results(results):
+    out = ""
+
+    textlist = []
+    for channel, max_runtime_minutes, start, end, unexpected in results:
+        res = -1
+        if end > start and len(unexpected) == 0:
+            res = 1
+        elif end > start and len(unexpected) > 0:
+            res = 2
+        elif start == dt_placeholder and end == dt_placeholder and len(unexpected) == 0:
+            res = 5
+        elif end <= start and (datetime.now(timezone.utc) - start).total_seconds()/60 < max_runtime_minutes:
+            res = 3
+        elif end < start:
+            res = 4
+        out += f"{channel}:{res}\n"
+        if len(unexpected) > 0:
+            textlist.append(f"{channel}: {', '.join(unexpected)}")
+
+    if len(textlist) > 0:
+        out += f"Errors:{', '.join(textlist)}"
+
+    return out
+
 if __name__ == "__main__":
 
-    arpgarser = argparse.ArgumentParser(description="Reads defined channels from Gotify and creates data for a PRTG sensor channel-wise")
-    arpgarser.add_argument("config_file", help="Path to the config.json")
+    argparser = argparse.ArgumentParser(description="Reads defined channels from Gotify and creates data for a PRTG sensor channel-wise")
+    argparser.add_argument("config_file", help="Path to the config.json")
+    argparser.add_argument("-p", "--plain-out", action="store_true", help="Output in plain instead of xml")
 
-    args = arpgarser.parse_args()
+    args = argparser.parse_args()
 
     if not os.path.exists(args.config_file):
         print(f"Could not find {args.config_file}")
@@ -138,4 +164,9 @@ if __name__ == "__main__":
             if res is not None:
                 results.append((channel['name'], channel['max_runtime_minutes'], *res))
 
-    print(create_prtg_xml(results))
+    o = ""
+    if args.plain_out:
+        o = create_plain_results(results)
+    else:
+        o = create_prtg_xml(results)
+    print(o)
