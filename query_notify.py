@@ -138,8 +138,9 @@ def create_plain_results(results):
         if len(unexpected) > 0:
             textlist.append(f"{channel}: {', '.join(unexpected)}")
 
+    out += f"Errors:{len(textlist)}"
     if len(textlist) > 0:
-        out += f"Errors:{', '.join(textlist)}"
+        out += f": {', '.join(textlist)}"
 
     return out
 
