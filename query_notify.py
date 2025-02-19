@@ -128,7 +128,7 @@ def create_plain_results(results):
             res = 1
         elif end > start and len(unexpected) > 0:
             res = 2
-        elif start == dt_placeholder and end == dt_placeholder and len(unexpected) == 0:
+        elif start == dt_placeholder and end == dt_placeholder:
             res = 5
         elif end <= start and (datetime.now(timezone.utc) - start).total_seconds()/60 < max_runtime_minutes:
             res = 3
